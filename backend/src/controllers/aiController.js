@@ -16,9 +16,6 @@ const askAi = async (req, res, next) => {
         answer: 'Gemini AI is not configured. Please add GEMINI_API_KEY to the backend .env file. Once added, the AI will analyze the reports.'
       });
     }
-    console.log("DEBUG KEY LENGTH:", process.env.GEMINI_API_KEY.length);
-    console.log("DEBUG KEY STARTS:", process.env.GEMINI_API_KEY.substring(0, 10));
-
 
     // Fetch all submitted reports for context
     const reports = await Report.find({ status: 'submitted' })

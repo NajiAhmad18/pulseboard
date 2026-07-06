@@ -4,7 +4,8 @@ const sendResponse = require('../utils/responseHandler');
 
 const getAllProjects = async (req, res, next) => {
   try {
-    const projects = await Project.find().sort({ name: 1 });
+    const query = req.user.role === 'admin' ? {} : { isActive: true };
+    const projects = await Project.find(query).sort({ name: 1 });
     sendResponse(res, 200, 'Projects retrieved', projects);
   } catch (error) {
     next(error);
@@ -35,8 +36,11 @@ const deleteProject = async (req, res, next) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) throw new AppError('Project not found', 404);
-    await project.deleteOne();
-    sendResponse(res, 200, 'Project deleted');
+    
+    project.isActive = false;
+    await project.save();
+    
+    sendResponse(res, 200, 'Project deleted successfully');
   } catch (error) {
     next(error);
   }

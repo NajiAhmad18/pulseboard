@@ -2,6 +2,10 @@ const Report = require('../models/Report');
 const AppError = require('../utils/AppError');
 
 const createReport = async (userId, reportData) => {
+  if (new Date(reportData.weekEndDate) < new Date(reportData.weekStartDate)) {
+    throw new AppError('Week end date cannot be before week start date', 400);
+  }
+
   return await Report.create({
     ...reportData,
     userId,
@@ -56,6 +60,12 @@ const updateReport = async (reportId, userId, updateData) => {
   // Prevent changing status directly through general update, must use submit logic
   if (updateData.status && updateData.status !== 'draft') {
      throw new AppError('Use submit endpoint to submit a report', 400);
+  }
+
+  if (updateData.weekStartDate && updateData.weekEndDate) {
+    if (new Date(updateData.weekEndDate) < new Date(updateData.weekStartDate)) {
+      throw new AppError('Week end date cannot be before week start date', 400);
+    }
   }
 
   Object.assign(report, updateData);
