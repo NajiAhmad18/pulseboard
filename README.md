@@ -409,6 +409,7 @@ pulseboard/
 ## 👤 Author
 
 **Naji Ahmad Javahir**
+- 🌐 Portfolio: [najiahmad.vercel.app](https://najiahmad.vercel.app/)
 - GitHub: [@NajiAhmad18](https://github.com/NajiAhmad18)
 
 ---
