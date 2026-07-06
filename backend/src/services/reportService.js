@@ -25,10 +25,26 @@ const getAllReports = async (filters) => {
     query.weekStartDate = { $gte: new Date(filters.startDate), $lte: new Date(filters.endDate) };
   }
 
-  return await Report.find(query)
-    .populate('projectId', 'name')
-    .populate('userId', 'name email')
-    .sort({ weekStartDate: -1 });
+  const page = Math.max(1, parseInt(filters.page) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(filters.limit) || 10));
+  const skip = (page - 1) * limit;
+
+  const [data, total] = await Promise.all([
+    Report.find(query)
+      .populate('projectId', 'name')
+      .populate('userId', 'name email')
+      .sort({ weekStartDate: -1 })
+      .skip(skip)
+      .limit(limit),
+    Report.countDocuments(query),
+  ]);
+
+  return {
+    data,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+  };
 };
 
 const getAdminReportById = async (reportId) => {

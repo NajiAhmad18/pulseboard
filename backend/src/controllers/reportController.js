@@ -21,8 +21,13 @@ const getMyReports = async (req, res, next) => {
 
 const getAllReports = async (req, res, next) => {
   try {
-    const reports = await reportService.getAllReports(req.query);
-    sendResponse(res, 200, 'All reports retrieved successfully', reports);
+    const result = await reportService.getAllReports(req.query);
+    // result = { data, total, page, totalPages }
+    res.status(200).json({
+      success: true,
+      message: 'All reports retrieved successfully',
+      ...result,
+    });
   } catch (error) {
     next(error);
   }
