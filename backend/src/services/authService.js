@@ -24,11 +24,16 @@ const registerUser = async (userData) => {
   };
 };
 
-const loginUser = async (email, password) => {
+const loginUser = async (email, password, role) => {
   const user = await User.findOne({ email });
 
   if (!user || !(await user.matchPassword(password))) {
     throw new AppError('Invalid email or password', 401);
+  }
+
+  if (role && user.role !== role) {
+    const roleName = user.role === 'admin' ? 'Manager' : 'Team Member';
+    throw new AppError(`Please use the ${roleName} login section.`, 403);
   }
 
   return {

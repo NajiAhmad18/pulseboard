@@ -22,7 +22,7 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      await login(data.email, data.password);
+      await login(data.email, data.password, activeTab);
       toast.success('Welcome back!');
       navigate('/dashboard');
     } catch (err) {

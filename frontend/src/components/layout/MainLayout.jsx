@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Menu, Search } from 'lucide-react';
 import Sidebar from './Sidebar';
 import { AuthContext } from '../../context/AuthContext';
@@ -15,6 +15,7 @@ export default function MainLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface-50">
@@ -54,12 +55,32 @@ export default function MainLayout() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Search hint — UI only */}
-            <div className="hidden sm:flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-400 cursor-default">
-              <Search className="h-3.5 w-3.5" />
-              <span>Search...</span>
-              <kbd className="ml-4 rounded border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-medium text-gray-400">/</kbd>
-            </div>
+            {/* Search input */}
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const search = formData.get('search');
+              if (search && search.trim()) {
+                const query = encodeURIComponent(search.trim());
+                if (user?.role === 'admin') {
+                  navigate(`/admin/reports?search=${query}`);
+                } else {
+                  navigate(`/member/reports?search=${query}`);
+                }
+              }
+            }} className="hidden sm:flex items-center gap-2.5 rounded-full border border-gray-200 bg-gray-50/80 px-3.5 py-1.5 text-sm focus-within:ring-[3px] focus-within:ring-accent-500/20 focus-within:border-accent-500 focus-within:bg-white transition-all duration-300 shadow-sm hover:bg-white w-[240px] focus-within:w-[300px] group">
+              <Search className="h-4 w-4 text-gray-400 group-focus-within:text-accent-500 transition-colors shrink-0" />
+              <input 
+                name="search"
+                type="text"
+                placeholder="Search reports..."
+                className="bg-transparent border-none border-0 focus:border-0 focus:border-none focus:ring-0 focus:outline-none outline-none text-gray-700 w-full placeholder-gray-400 p-0 shadow-none ring-0 h-full"
+                autoComplete="off"
+              />
+              <div className="flex shrink-0 items-center justify-center rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-gray-400 shadow-sm group-focus-within:border-accent-200 group-focus-within:text-accent-500 transition-colors">
+                <kbd className="font-sans">cmd K</kbd>
+              </div>
+            </form>
           </div>
         </header>
 

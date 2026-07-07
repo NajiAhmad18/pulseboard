@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Plus, Eye, Pencil, Trash2 } from 'lucide-react';
 import api from '../../services/api';
 import { Card } from '../../components/common/Card';
@@ -17,13 +17,25 @@ export default function ReportList() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const currentSearch = searchParams.get('search') || '';
+
+  const navigate = useNavigate();
+
   useEffect(() => {
     fetchReports();
-  }, []);
+  }, [location.search]);
 
   const fetchReports = async () => {
     try {
-      const res = await api.get('/reports');
+      const queryParams = new URLSearchParams(location.search);
+      const search = queryParams.get('search');
+      let url = '/reports';
+      if (search) {
+        url += `?search=${encodeURIComponent(search)}`;
+      }
+      const res = await api.get(url);
       setReports(res.data.data);
     } catch (error) {
       console.error(error);
@@ -54,6 +66,19 @@ export default function ReportList() {
           <Button size="sm"><Plus className="h-4 w-4" /> New Report</Button>
         </Link>
       </PageHeader>
+
+      {currentSearch && (
+        <div className="flex items-center gap-2 bg-accent-50 text-accent-700 px-3 py-2 rounded-lg text-sm font-medium border border-accent-100 mb-4 w-max">
+          <span>Search: "{currentSearch}"</span>
+          <button 
+            onClick={() => navigate('/member/reports')}
+            className="text-accent-500 hover:text-accent-800 ml-1"
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       {loading ? <SkeletonTable rows={5} cols={4} /> : reports.length === 0 ? (
         <EmptyState 

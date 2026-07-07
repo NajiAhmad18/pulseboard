@@ -6,7 +6,7 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { PageHeader } from '../../components/common/PageHeader';
 import Select from '../../components/common/Select';
 import { SkeletonTable } from '../../components/common/Skeleton';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Eye, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import Button from '../../components/common/Button';
 import { ExportModal } from '../../components/export/ExportModal';
@@ -19,11 +19,20 @@ export default function AdminReportList() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const location = useLocation();
+  const initialSearch = new URLSearchParams(location.search).get('search') || '';
+
   const [filters, setFilters] = useState({
     userId: '',
     projectId: '',
     status: '',
+    search: initialSearch,
   });
+
+  useEffect(() => {
+    const currentSearch = new URLSearchParams(location.search).get('search') || '';
+    setFilters(prev => ({ ...prev, search: currentSearch }));
+  }, [location.search]);
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -66,6 +75,7 @@ export default function AdminReportList() {
       if (filters.userId) query.append('userId', filters.userId);
       if (filters.projectId) query.append('projectId', filters.projectId);
       if (filters.status) query.append('status', filters.status);
+      if (filters.search) query.append('search', filters.search);
       query.append('page', page);
       query.append('limit', PAGE_LIMIT);
 
@@ -103,10 +113,11 @@ export default function AdminReportList() {
 
       {/* Filters */}
       <Card className="p-4">
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 items-center flex-wrap">
           <Select
             value={filters.userId}
             onChange={e => setFilters({ ...filters, userId: e.target.value })}
+            className="min-w-[150px]"
           >
             <option value="">All Members</option>
             {users.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
@@ -115,6 +126,7 @@ export default function AdminReportList() {
           <Select
             value={filters.projectId}
             onChange={e => setFilters({ ...filters, projectId: e.target.value })}
+            className="min-w-[150px]"
           >
             <option value="">All Projects</option>
             {projects.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
@@ -123,11 +135,25 @@ export default function AdminReportList() {
           <Select
             value={filters.status}
             onChange={e => setFilters({ ...filters, status: e.target.value })}
+            className="min-w-[150px]"
           >
             <option value="">All Statuses</option>
             <option value="submitted">Submitted</option>
             <option value="draft">Draft</option>
           </Select>
+
+          {filters.search && (
+            <div className="flex items-center gap-2 bg-accent-50 text-accent-700 px-3 py-1.5 rounded-lg text-sm font-medium border border-accent-100 ml-auto">
+              <span>Search: "{filters.search}"</span>
+              <button 
+                onClick={() => setFilters({ ...filters, search: '' })}
+                className="text-accent-500 hover:text-accent-800 ml-1"
+                aria-label="Clear search"
+              >
+                &times;
+              </button>
+            </div>
+          )}
         </div>
       </Card>
 

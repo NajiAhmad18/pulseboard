@@ -12,8 +12,18 @@ const createReport = async (userId, reportData) => {
   });
 };
 
-const getMyReports = async (userId) => {
-  return await Report.find({ userId }).populate('projectId', 'name').sort({ weekStartDate: -1 });
+const getMyReports = async (userId, filters = {}) => {
+  const query = { userId };
+  if (filters.search) {
+    const searchRegex = new RegExp(filters.search, 'i');
+    query.$or = [
+      { tasksCompleted: searchRegex },
+      { tasksPlanned: searchRegex },
+      { blockers: searchRegex },
+      { notes: searchRegex }
+    ];
+  }
+  return await Report.find(query).populate('projectId', 'name').sort({ weekStartDate: -1 });
 };
 
 const getAllReports = async (filters) => {
@@ -23,6 +33,15 @@ const getAllReports = async (filters) => {
   if (filters.status) query.status = filters.status;
   if (filters.startDate && filters.endDate) {
     query.weekStartDate = { $gte: new Date(filters.startDate), $lte: new Date(filters.endDate) };
+  }
+  if (filters.search) {
+    const searchRegex = new RegExp(filters.search, 'i');
+    query.$or = [
+      { tasksCompleted: searchRegex },
+      { tasksPlanned: searchRegex },
+      { blockers: searchRegex },
+      { notes: searchRegex }
+    ];
   }
 
   const page = Math.max(1, parseInt(filters.page) || 1);

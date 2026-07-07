@@ -12,7 +12,7 @@ const createReport = async (req, res, next) => {
 
 const getMyReports = async (req, res, next) => {
   try {
-    const reports = await reportService.getMyReports(req.user._id);
+    const reports = await reportService.getMyReports(req.user._id, req.query);
     sendResponse(res, 200, 'Reports retrieved successfully', reports);
   } catch (error) {
     next(error);
